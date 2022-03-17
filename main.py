@@ -11,8 +11,18 @@ def account():
     return render_template('account.jinja2')
 
 
-@app.route('/account-login')
+@app.route('/account-login', methods=['POST', 'GET'])
 def login():
+    if request.method == 'POST':
+        username_login = request.form['username_l']
+        password_login = request.form['password_l']
+        check_username_and_password_exist_login = 'SELECT * FROM users WHERE username = %s AND password = %s'
+        value_check_username_and_password_exist_login = (username_login, password_login)
+        cursor.execute(check_username_and_password_exist_login, value_check_username_and_password_exist_login)
+        if cursor.fetchone():
+            session["user"] = username_login
+        else:
+            flash('user isn\'t exist try other password or username')
     return render_template('login.jinja2')
 
 
