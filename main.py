@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, url_for, redirect, render_template, session, flash, request
 import mysql.connector
 from db_connect import *
@@ -20,7 +22,8 @@ def login():
         value_check_username_and_password_exist_login = (username_login, password_login)
         cursor.execute(check_username_and_password_exist_login, value_check_username_and_password_exist_login)
         if cursor.fetchone():
-            session["user"] = username_login
+            session['user'] = username_login
+            return redirect(url_for('chats'))
         else:
             flash('user isn\'t exist try other password or username')
     return render_template('login.jinja2')
@@ -38,7 +41,7 @@ def register():
             flash(
                 'your password or username is null, your password must have 8 to 128 characters and username must have 4 to 128 characters')
         else:
-            if cursor.fetchone()[0]:
+            if cursor.fetchone()[1]:
                 flash('username already exist, try other', 'info')
             else:
                 username_add_to_db = 'INSERT INTO users (username, password) VALUES(%s, %s)'
@@ -48,6 +51,31 @@ def register():
                 return redirect(url_for('login'))
 
     return render_template('register.jinja2')
+
+
+@app.route('/add-chat', methods=['POST', 'GET'])
+def add_chat():
+    if 'user' in session:
+        if request.method == 'POST':
+            name_room = request.form['room_name']
+            password_room = request.form['room_password']
+            values_id_room = name_room + password_room
+            id_room_result = ''.join(random.sample(values_id_room, len(values_id_room)))
+            add_chat_info_to_db = 'INSERT INTO chats (chat_name, id_chat, password_chat) VALUES (%s, %s, %s)'
+            values_add_chat_info_to_db = (name_room, password_room, id_room_result)
+            cursor.execute(add_chat_info_to_db, values_add_chat_info_to_db)
+            db_connect.commit()
+        return render_template('add_chat.jinja2')
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/chats')
+def chats():
+    if 'user' in session:
+        return render_template('chats.jinja2')
+    else:
+        return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

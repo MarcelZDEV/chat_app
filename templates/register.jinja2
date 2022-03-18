@@ -9,30 +9,34 @@
           integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
 </head>
 <body class="bg-light">
-<form method="post">
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for messages_register in messages %}
-                <p>{{ messages_register }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <div class="input-group mb-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text">@</span>
+<div class="container-fluid">
+    <form method="post">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for messages_register in messages %}
+                    <p>{{ messages_register }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">@</span>
+            </div>
+            <input type="text" class="form-control" placeholder="username" name="username_r" minlength="4"
+                   maxlength="128">
         </div>
-        <input type="text" class="form-control" placeholder="username" name="username_r" minlength="4" maxlength="128">
-    </div>
 
-    <div class="input-group mb-3">
-        <input type="password" class="form-control" placeholder="password" name="password_r" minlength="8" maxlength="128">
-        <div class="input-group-append">
-            <span class="input-group-text">password</span>
+        <div class="input-group mb-3">
+            <input type="password" class="form-control" placeholder="password" name="password_r" minlength="8"
+                   maxlength="128">
+            <div class="input-group-append">
+                <span class="input-group-text">password</span>
+            </div>
         </div>
-    </div>
-    <input type="submit" class="btn btn-success" value="register">
-    <input type="reset" class="btn btn-danger" value="cancel">
-</form>
+        <input type="submit" class="btn btn-success" value="register">
+        <input type="reset" class="btn btn-danger" value="cancel">
+    </form>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
