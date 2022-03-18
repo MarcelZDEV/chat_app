@@ -1,5 +1,5 @@
 import random
-
+import uuid
 from flask import Flask, url_for, redirect, render_template, session, flash, request
 import mysql.connector
 from db_connect import *
@@ -53,27 +53,47 @@ def register():
     return render_template('register.jinja2')
 
 
-@app.route('/add-chat', methods=['POST', 'GET'])
+@app.route('/add-room', methods=['POST', 'GET'])
 def add_chat():
     if 'user' in session:
+        user = session['user']
         if request.method == 'POST':
             name_room = request.form['room_name']
             password_room = request.form['room_password']
-            values_id_room = name_room + password_room
-            id_room_result = ''.join(random.sample(values_id_room, len(values_id_room)))
-            add_chat_info_to_db = 'INSERT INTO chats (chat_name, id_chat, password_chat) VALUES (%s, %s, %s)'
-            values_add_chat_info_to_db = (name_room, password_room, id_room_result)
+            id_room_result = uuid.uuid1()
+            id_room_result = ''.join(str(id_room_result))
+            add_chat_info_to_db = 'INSERT INTO chats (chat_name, id_chat, password_chat, user) VALUES (%s, %s, %s, %s)'
+            values_add_chat_info_to_db = (name_room, id_room_result, password_room, user)
             cursor.execute(add_chat_info_to_db, values_add_chat_info_to_db)
             db_connect.commit()
+            return redirect(url_for('chats'))
         return render_template('add_chat.jinja2')
     else:
         return redirect(url_for('login'))
 
 
-@app.route('/chats')
+@app.route('/')
+@app.route('/rooms')
 def chats():
     if 'user' in session:
-        return render_template('chats.jinja2')
+        user = session['user']
+        select_all_chats_user = 'SELECT chat_name FROM chats WHERE user = %s'
+        value_select_all_chats_user = (user, )
+        cursor.execute(select_all_chats_user, value_select_all_chats_user)
+        select_all_chats_user_result = cursor.fetchall()
+        return render_template('chats.jinja2', chat=select_all_chats_user_result)
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/join-room', methods=['POST', 'GET'])
+def join_room():
+    if 'user' in session:
+        if request.method == 'POST':
+            room_name = request.form['room_name']
+            room_password = request.form['room_password']
+            room_id = request.form['room_id']
+        return render_template('join_room.jinja2')
     else:
         return redirect(url_for('login'))
 
