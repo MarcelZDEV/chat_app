@@ -72,6 +72,9 @@ def add_chat():
             value_add_chat_info_to_user_db = (name_room, )
             cursor.execute(add_chat_info_to_user_db, value_add_chat_info_to_user_db)
 
+            create_message_chat_db = f'CREATE TABLE chats.{name_room} (messages VARCHAR(128))'
+            cursor.execute(create_message_chat_db)
+
             db_connect.commit()
             return redirect(url_for('chats'))
         return render_template('add_chat.jinja2')
@@ -108,6 +111,7 @@ def join_room():
                 value_add_chat_info_to_user_db = (room_name,)
                 cursor.execute(add_chat_info_to_user_db, value_add_chat_info_to_user_db)
                 db_connect.commit()
+                return redirect(url_for('chats'))
             else:
                 flash('room don\'t exist')
         return render_template('join_room.jinja2')
