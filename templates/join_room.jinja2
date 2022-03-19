@@ -11,6 +11,13 @@
 <body class="bg-light">
 <div class="container-fluid">
     <form method="post">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for messages_join_room in messages %}
+                    <p>{{ messages_join_room }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text">#</span>
@@ -28,7 +35,7 @@
             <div class="input-group-append">
                 <span class="input-group-text">id room</span>
             </div>
-            <input type="password" class="form-control" placeholder="room id" name="room_id">
+            <input type="text" class="form-control" placeholder="room id" name="room_id">
         </div>
         <input type="submit" class="btn btn-success" value="create">
         <input type="reset" class="btn btn-danger" value="cancel">

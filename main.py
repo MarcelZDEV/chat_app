@@ -41,12 +41,14 @@ def register():
             flash(
                 'your password or username is null, your password must have 8 to 128 characters and username must have 4 to 128 characters')
         else:
-            if cursor.fetchone()[1]:
+            if cursor.fetchone()[0]:
                 flash('username already exist, try other', 'info')
             else:
                 username_add_to_db = 'INSERT INTO users (username, password) VALUES(%s, %s)'
                 value_username_add_to_db = (username_register, password_register)
                 cursor.execute(username_add_to_db, value_username_add_to_db)
+                create_username_db = f'CREATE TABLE {username_register} (chats VARCHAR(128))'
+                cursor.execute(create_username_db)
                 db_connect.commit()
                 return redirect(url_for('login'))
 
@@ -65,6 +67,11 @@ def add_chat():
             add_chat_info_to_db = 'INSERT INTO chats (chat_name, id_chat, password_chat, user) VALUES (%s, %s, %s, %s)'
             values_add_chat_info_to_db = (name_room, id_room_result, password_room, user)
             cursor.execute(add_chat_info_to_db, values_add_chat_info_to_db)
+
+            add_chat_info_to_user_db = f'INSERT INTO {user} (chats) VALUES (%s)'
+            value_add_chat_info_to_user_db = (name_room, )
+            cursor.execute(add_chat_info_to_user_db, value_add_chat_info_to_user_db)
+
             db_connect.commit()
             return redirect(url_for('chats'))
         return render_template('add_chat.jinja2')
@@ -77,9 +84,8 @@ def add_chat():
 def chats():
     if 'user' in session:
         user = session['user']
-        select_all_chats_user = 'SELECT chat_name FROM chats WHERE user = %s'
-        value_select_all_chats_user = (user, )
-        cursor.execute(select_all_chats_user, value_select_all_chats_user)
+        select_all_chats_user = f'SELECT chats FROM {user}'
+        cursor.execute(select_all_chats_user)
         select_all_chats_user_result = cursor.fetchall()
         return render_template('chats.jinja2', chat=select_all_chats_user_result)
     else:
@@ -89,13 +95,30 @@ def chats():
 @app.route('/join-room', methods=['POST', 'GET'])
 def join_room():
     if 'user' in session:
+        user = session['user']
         if request.method == 'POST':
             room_name = request.form['room_name']
             room_password = request.form['room_password']
             room_id = request.form['room_id']
+            check_chat_exist = 'SELECT * FROM chats WHERE chat_name = %s AND id_chat = %s AND password_chat = %s'
+            values_check_chat_exist = (room_name, room_id, room_password)
+            cursor.execute(check_chat_exist, values_check_chat_exist)
+            if cursor.fetchone()[1]:
+                add_chat_info_to_user_db = f'INSERT INTO {user} (chats) VALUES (%s)'
+                value_add_chat_info_to_user_db = (room_name,)
+                cursor.execute(add_chat_info_to_user_db, value_add_chat_info_to_user_db)
+                db_connect.commit()
+            else:
+                flash('room don\'t exist')
         return render_template('join_room.jinja2')
     else:
         return redirect(url_for('login'))
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return render_template('account.jinja2')
 
 
 if __name__ == '__main__':
